@@ -14,3 +14,10 @@ time
 
 
 You just have to fill your `config.ini` file with the corresponding paths to your directories, and fill in the `PATH_TO_INI_FILE` in the `automove.py` file, and the job will be done!
+
+To have it running on the background, use the following command from terminal :
+
+```shell
+python3 automove.py &
+```
+
