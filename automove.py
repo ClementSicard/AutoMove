@@ -32,8 +32,10 @@ def main():
             print("[AutoMove] Moving", len(files),
                   "file(s) from OneDrive to iCloud...")
             for f in files:
+                print("[AutoMove] Moving", f)
                 shutil.move(onedrive_path[:-1] + f, icloud_path +
                             f, copy_function=shutil.copy)
+                print("[AutoMove] Done moving", f, "!")
 
             print("[AutoMove] Success!")
         elif nothing == False:
