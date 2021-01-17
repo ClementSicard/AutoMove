@@ -4,6 +4,30 @@ import glob
 import time
 import configparser
 import pync
+import re
+
+
+SERIES_REGEXP = r"\w+ - S\d*.\w+$"
+HW_REGEXP = r"\w+ - HW\d*.\w+$"
+LECTURE_REGEXP = r"\w+ - \d*.\w+$"
+CS_REGEXP = r"\w+ - (Summary|Tricks|Useful to know)*.\w+$"
+
+
+def modified_path_with_regex(file_name) -> str:
+    if re.search(SERIES_REGEXP, file_name):
+        idx = file_name[1:].find("/") + 1
+        return file_name[:idx + 1] + "EXERCIZES" + file_name[idx:]
+    elif re.search(HW_REGEXP, file_name):
+        idx = file_name[1:].find("/") + 1
+        return file_name[:idx + 1] + "HOMEWORKS" + file_name[idx:]
+    elif re.search(LECTURE_REGEXP, file_name):
+        idx = file_name[1:].find("/") + 1
+        return file_name[: idx + 1] + "LECTURES" + file_name[idx:]
+    elif re.search(CS_REGEXP, file_name):
+        idx = file_name[1:].find("/") + 1
+        return file_name[: idx + 1] + "CHEATSHEETS" + file_name[idx:]
+    else:
+        return file_name
 
 
 def main():
@@ -17,7 +41,7 @@ def main():
 
     nothing = False
 
-    pync.notify("Automove started!", title="AutoMove 🔁",
+    pync.notify("AutoMove a démarré !", title="AutoMove 🔁",
                 activate="com.apple.finder")
 
     while True:
@@ -34,10 +58,23 @@ def main():
         if files != []:
             nothing = False
             for f in files:
-                shutil.move(onedrive_path[:-1] + f, icloud_path +
-                            f, copy_function=shutil.copy)
-            pync.notify(str(len(files)) +
-                        " fichier(s) déplacé(s) depuis OneDrive vers iCloud bg", title="AutoMove 🔁", activate="com.apple.finder")
+                new_path = modified_path_with_regex(f)
+                file_name = f[f.rfind("/") + 1:]
+                try:
+                    shutil.move(onedrive_path[:-1] + f, icloud_path +
+                                new_path, copy_function=shutil.copy)
+                    if len(files) == 1:
+                        pync.notify(file_name +
+                                    " a été déplacé depuis OneDrive vers iCloud bg", title="[✅] AutoMove 🔁", activate="com.apple.finder")
+                except:
+                    shutil.move(onedrive_path[:-1] + f, icloud_path +
+                                f, copy_function=shutil.copy)
+                    pync.notify("Oops beau gosse, mauvais path : " + file_name + " a été déplacé à la racine du dossier",
+                                title="[❌] AutoMove 🔁", activate="com.apple.finder")
+
+            if len(files) > 1:
+                pync.notify("Bonne nouvelle beau gosse ! " + str(len(files)) +
+                            " fichier(s) déplacé(s) vers iCloud", title="[✅] AutoMove 🔁", activate="com.apple.finder")
 
         elif nothing == False:
             nothing = True
