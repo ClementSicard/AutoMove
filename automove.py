@@ -9,7 +9,7 @@ import re
 
 SERIES_REGEXP = r"\w+ - S\d*.\w+$"
 HW_REGEXP = r"\w+ - HW\d*.\w+$"
-LECTURE_REGEXP = r"\w+ - \d*.\w+$"
+LECTURE_REGEXP = r"(\w+ - \d*.\w+$|Lecture notes.\w+$)"
 CS_REGEXP = r"\w+ - (Summary|Tricks|Useful to know)*.\w+$"
 
 
