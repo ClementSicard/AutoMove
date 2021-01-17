@@ -41,7 +41,7 @@ def main():
 
     nothing = False
 
-    pync.notify("AutoMove a démarré !", title="AutoMove 🔁",
+    pync.notify("📣 AutoMove a démarré !", title="AutoMove 🔁",
                 activate="com.apple.finder")
 
     while True:
@@ -63,22 +63,29 @@ def main():
                 try:
                     shutil.move(onedrive_path[:-1] + f, icloud_path +
                                 new_path, copy_function=shutil.copy)
-                    if len(files) == 1:
-                        pync.notify(file_name +
-                                    " a été déplacé depuis OneDrive vers iCloud bg", title="[✅] AutoMove 🔁", activate="com.apple.finder")
+                    if len(files) == 1 and new_path != f:
+                        pync.notify("✅  " + file_name +
+                                    " a été déplacé depuis OneDrive vers iCloud", title="AutoMove 🔁", activate="com.apple.finder")
+                    elif new_path == f:
+                        pync.notify("❓ Oups! Path inconnu\n" + file_name + " a été déplacé à la racine du dossier",
+                                    title="AutoMove 🔁", activate="com.apple.finder")
                 except:
-                    shutil.move(onedrive_path[:-1] + f, icloud_path +
-                                f, copy_function=shutil.copy)
-                    pync.notify("Oops beau gosse, mauvais path : " + file_name + " a été déplacé à la racine du dossier",
-                                title="[❌] AutoMove 🔁", activate="com.apple.finder")
+                    try:
+                        shutil.move(onedrive_path[:-1] + f, icloud_path +
+                                    f, copy_function=shutil.copy)
+                        pync.notify("❓ Oups! Path iconnu\n" + file_name + " a été déplacé à la racine du dossier",
+                                    title="AutoMove 🔁", activate="com.apple.finder")
+                    except:
+                        pync.notify("❌ Oups, impossible de déplacer " + file_name,
+                                    title="AutoMove 🔁", activate="com.apple.finder")
 
             if len(files) > 1:
-                pync.notify("Bonne nouvelle beau gosse ! " + str(len(files)) +
-                            " fichier(s) déplacé(s) vers iCloud", title="[✅] AutoMove 🔁", activate="com.apple.finder")
+                pync.notify("✅  Bonne nouvelle beau gosse ! \n\n" + str(len(files)) +
+                            " fichier(s) déplacé(s) vers iCloud", title="AutoMove 🔁", activate="com.apple.finder")
 
         elif nothing == False:
             nothing = True
-        time.sleep(2)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
