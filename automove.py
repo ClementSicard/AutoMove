@@ -3,10 +3,11 @@ import os
 import glob
 import time
 import configparser
+import pync
 
 
 def main():
-    PATH_TO_INI_FILE = "/Users/clementsicard/Dev/AutoMove/config.ini"
+    PATH_TO_INI_FILE = "/Users/clementsicard/Dev/GitHub/Automove/config.ini"
 
     config = configparser.ConfigParser()
     config.read(PATH_TO_INI_FILE)
@@ -15,6 +16,9 @@ def main():
     icloud_path = config["PATHS"]["icloud_path"]
 
     nothing = False
+
+    pync.notify("Automove started!", title="AutoMove 🔁",
+                activate="com.apple.finder")
 
     while True:
         icloud_folders = [folder for folder in os.listdir(
@@ -29,18 +33,15 @@ def main():
 
         if files != []:
             nothing = False
-            print("[AutoMove] Moving", len(files),
-                  "file(s) from OneDrive to iCloud...")
             for f in files:
-                print("[AutoMove] Moving", f)
                 shutil.move(onedrive_path[:-1] + f, icloud_path +
                             f, copy_function=shutil.copy)
-                print("[AutoMove] Done moving", f, "!")
+            pync.notify(str(len(files)) +
+                        " fichier(s) déplacé(s) depuis OneDrive vers iCloud bg", title="AutoMove 🔁", activate="com.apple.finder")
 
-            print("[AutoMove] Success!")
         elif nothing == False:
             nothing = True
-            print("[AutoMove] Nothing to do for now.\n")
+        time.sleep(2)
 
 
 if __name__ == "__main__":
