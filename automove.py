@@ -57,31 +57,38 @@ def main():
 
         if files != []:
             nothing = False
+            new_bool = False
             for f in files:
                 new_path = modified_path_with_regex(f)
                 file_name = f[f.rfind("/") + 1:]
                 try:
+                    new_bool = os.path.exists(icloud_path + new_path)
                     shutil.move(onedrive_path[:-1] + f, icloud_path +
                                 new_path, copy_function=shutil.copy)
                     if len(files) == 1 and new_path != f:
-                        pync.notify("✅  " + file_name +
-                                    " a été déplacé depuis OneDrive vers iCloud", title="AutoMove 🔁", activate="com.apple.finder")
+                        if not new_bool:
+                            pync.notify("✅  " + file_name +
+                                        " a été déplacé depuis OneDrive vers iCloud.", title="AutoMove 🔁", activate="com.apple.finder")
+                        else:
+                            pync.notify("✅  " + file_name +
+                                        " a été mis à jour sur iCloud.", title="AutoMove 🔁", activate="com.apple.finder")
+
                     elif new_path == f:
-                        pync.notify("❓ Oups! Path inconnu\n" + file_name + " a été déplacé à la racine du dossier",
+                        pync.notify("❓ Oups! Path inconnu\n" + file_name + " a été déplacé à la racine du dossier.",
                                     title="AutoMove 🔁", activate="com.apple.finder")
                 except:
                     try:
                         shutil.move(onedrive_path[:-1] + f, icloud_path +
                                     f, copy_function=shutil.copy)
-                        pync.notify("❓ Oups! Path iconnu\n" + file_name + " a été déplacé à la racine du dossier",
+                        pync.notify("❓ Oups! Path iconnu\n" + file_name + " a été déplacé à la racine du dossier.",
                                     title="AutoMove 🔁", activate="com.apple.finder")
                     except:
-                        pync.notify("❌ Oups, impossible de déplacer " + file_name,
+                        pync.notify("❌ Oups, impossible de déplacer " + file_name + ".",
                                     title="AutoMove 🔁", activate="com.apple.finder")
 
             if len(files) > 1:
-                pync.notify("✅  Bonne nouvelle beau gosse ! \n\n" + str(len(files)) +
-                            " fichier(s) déplacé(s) vers iCloud", title="AutoMove 🔁", activate="com.apple.finder")
+                pync.notify("✅  Bonne nouvelle ! \n" + str(len(files)) +
+                            " fichier(s) déplacé(s) vers iCloud.", title="AutoMove 🔁", activate="com.apple.finder")
 
         elif nothing == False:
             nothing = True
