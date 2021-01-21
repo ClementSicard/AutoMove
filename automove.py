@@ -30,6 +30,10 @@ def modified_path_with_regex(file_name) -> str:
         return file_name
 
 
+def terminal_command(path: str) -> str:
+    return "terminal-notifier -title 'Title' -message 'Message' -actions 'Close' -execute 'open ~/'"
+
+
 def main():
     PATH_TO_INI_FILE = "/Users/clementsicard/Dev/GitHub/Automove/config.ini"
 
@@ -40,9 +44,8 @@ def main():
     icloud_path = config["PATHS"]["icloud_path"]
 
     nothing = False
-
-    pync.notify("📣 AutoMove a démarré !", title="AutoMove 🔁",
-                activate="com.apple.finder")
+    pync.notify("📣 AutoMove a démarré !", title="AutoMove 🔁", actions="Close",
+                execute="open \"{}\"".format(icloud_path[:-1]))
 
     while True:
         icloud_folders = [folder for folder in os.listdir(
@@ -68,27 +71,27 @@ def main():
                     if len(files) == 1 and new_path != f:
                         if not new_bool:
                             pync.notify("✅  " + file_name +
-                                        " a été déplacé depuis OneDrive vers iCloud.", title="AutoMove 🔁", activate="com.apple.finder")
+                                        " a été déplacé depuis OneDrive vers iCloud.", title="AutoMove 🔁", actions="Close", execute="open \"{}\"".format(icloud_path + new_path))
                         else:
                             pync.notify("✅  " + file_name +
-                                        " a été mis à jour sur iCloud.", title="AutoMove 🔁", activate="com.apple.finder")
+                                        " a été mis à jour sur iCloud.", title="AutoMove 🔁", actions="Close", execute="open \"{}\"".format(icloud_path + new_path))
 
                     elif new_path == f:
                         pync.notify("❓ Oups! Path inconnu\n" + file_name + " a été déplacé à la racine du dossier.",
-                                    title="AutoMove 🔁", activate="com.apple.finder")
+                                    title="AutoMove 🔁", actions="Close", execute="open \"{}\"".format(icloud_path + new_path))
                 except:
                     try:
                         shutil.move(onedrive_path[:-1] + f, icloud_path +
                                     f, copy_function=shutil.copy)
                         pync.notify("❓ Oups! Path iconnu\n" + file_name + " a été déplacé à la racine du dossier.",
-                                    title="AutoMove 🔁", activate="com.apple.finder")
+                                    title="AutoMove 🔁", actions="Close", execute="open \"{}\"".format(icloud_path + f))
                     except:
                         pync.notify("❌ Oups, impossible de déplacer " + file_name + ".",
-                                    title="AutoMove 🔁", activate="com.apple.finder")
+                                    title="AutoMove 🔁", actions="Close", execute="open \"{}\"".format(onedrive_path[:-1] + f))
 
             if len(files) > 1:
                 pync.notify("✅  Bonne nouvelle ! \n" + str(len(files)) +
-                            " fichier(s) déplacé(s) vers iCloud.", title="AutoMove 🔁", activate="com.apple.finder")
+                            " fichier(s) déplacé(s) vers iCloud.", title="AutoMove 🔁", actions="Close", execute="open \"{}\"".format(icloud_path))
 
         elif nothing == False:
             nothing = True
