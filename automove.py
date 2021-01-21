@@ -9,6 +9,7 @@ import re
 
 SERIES_REGEXP = r"\w+ - S\d*.\w+$"
 HW_REGEXP = r"\w+ - HW\d*.\w+$"
+EXAM_REGEXP = r"\w+ - E\d*.\w+$"
 LECTURE_REGEXP = r"(\w+ - \d*.\w+$|Lecture notes.\w+$)"
 CS_REGEXP = r"\w+ - (Summary|Tricks|Useful to know)*.\w+$"
 
@@ -26,6 +27,9 @@ def modified_path_with_regex(file_name) -> str:
     elif re.search(CS_REGEXP, file_name):
         idx = file_name[1:].find("/") + 1
         return file_name[: idx + 1] + "CHEATSHEETS" + file_name[idx:]
+    elif re.search(EXAM_REGEXP, file_name):
+        idx = file_name[1:].find("/") + 1
+        return file_name[: idx + 1] + "EXAMS" + file_name[idx:]
     else:
         return file_name
 
