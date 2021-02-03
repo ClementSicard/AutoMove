@@ -21,3 +21,5 @@ To have it running on the background, use the following command from terminal :
 python3 automove.py &
 ```
 
+The script automatically sends notifications to Notification Center in macOS when anything happens (copy of a file, multiple files, copy failure, app starting)
+
