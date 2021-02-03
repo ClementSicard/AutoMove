@@ -10,6 +10,13 @@ shutil
 os
 glob
 time
+pync
+```
+
+You can install all of them using this command :
+
+```
+pip install configparser shutil os glob time pync
 ```
 
 
@@ -21,5 +28,12 @@ To have it running on the background, use the following command from terminal :
 python3 automove.py &
 ```
 
-The script automatically sends notifications to Notification Center in macOS when anything happens (copy of a file, multiple files, copy failure, app starting)
+You can easily set up an Automator app starting AutoMove automatically when logging in by creating a Shell script-executing app, and insert in it the following command :
+
+```shell
+nohup /usr/local/bin/python3 <path to Python script>/automove.py > /dev/null 2>&1 &
+```
+Just open the Automator app and set it on your device.
+
+The script also automatically sends notifications to Notification Center in macOS when anything happens (copy of a file, multiple files, copy failure, app starting)
 
