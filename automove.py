@@ -43,7 +43,7 @@ def terminal_command(path: str) -> str:
 
 
 def main():
-    PATH_TO_INI_FILE = "/Users/clementsicard/Dev/GitHub/Automove/config.ini"
+    PATH_TO_INI_FILE = "/Users/clementsicard/Developer/GitHub/Automove/config.ini"
 
     config = configparser.ConfigParser()
     config.read(PATH_TO_INI_FILE)
