@@ -1,1 +1,5 @@
 *.ini
+.DS_Store
+*.iml
+*.xml
+*.pyc
