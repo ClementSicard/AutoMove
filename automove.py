@@ -78,8 +78,8 @@ class AutoMove:
             if self.tmp_paths:
                 nothing = False
 
-                # self.__copy_files_to_icloud()
-                # print("Done copying to iCloud")
+                self.__copy_files_to_icloud()
+                print("Done copying to iCloud")
 
                 if self.sftp_bool:
                     self.__backup_files_on_NAS()
