@@ -6,6 +6,7 @@ def parse_args():
     parser = ArgumentParser()
 
     parser.add_argument("--sftp", action="store_true", default=False)
+    parser.add_argument("-v", "--verbose", action="store_true", default=False)
 
     return vars(parser.parse_args())
 
