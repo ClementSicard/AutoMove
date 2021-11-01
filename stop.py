@@ -1,4 +1,5 @@
 import os
+from helper import *
 
 
 def stop_automove():
@@ -10,7 +11,14 @@ def stop_automove():
 
         print(f"Stopped AutoMove (killed PID [{pid}])")
 
+        send_notification(message=f"✅ AutoMove a bien été arrêté !",
+                          content=f"(PID [{pid}])")
+
     else:
+        send_notification(
+            message=f"🚨 AutoMove is not currently running, or PID file has been deleted.",
+            important=True,
+        )
         exit("AutoMove is not currently running or PID file has been deleted.")
 
 

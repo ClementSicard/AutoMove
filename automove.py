@@ -7,24 +7,16 @@ import time
 import configparser
 import pync
 import re
-import paramiko
+from paramiko import SFTPClient
 from fnmatch import fnmatch
 from typing import List, Dict, Union
-
-SERIES_REGEXP = r"\w+ - S\d*.*.\w+$"
-HW_REGEXP = r"\w+ - HW\d*.*.\w+$"
-EXAM_REGEXP = r"\w+ - E\d*.*.\w+$"
-REVISION_REGEXP = r"\w+ - R\d*.*.\w+$"
-LECTURE_REGEXP = r"\w+ - (\d*|Lecture notes|SLIDES|Slides).*.\w+$"
-CS_REGEXP = r"\w+ - (Summary|Tricks|Useful to know|Cheatsheet|Formulaire)*.*.\w+$"
-
-PATH_TO_INI_FILE = os.path.join(os.path.dirname(__file__), "config.ini")
+from helper import *
 
 
 class AutoMove:
     args: Dict[str, Union[str, bool]]
     sftp_bool: bool
-    sftp: paramiko.SFTPClient
+    sftp: SFTPClient
     sftp_backup_path: str
     sftp_path: str
     icloud_path: str
@@ -51,7 +43,9 @@ class AutoMove:
         self.verbose = self.args["verbose"]
         self.sftp_bool = self.args["sftp"]
 
-        self.checkPID()
+        success, pid = checkPID()
+        if success and self.verbose:
+            print(f"AutoMove started with PID [{pid}].\n")
 
         self.icloud_path = config["PATHS"]["icloud_path"]
         self.onedrive_path = config["PATHS"]["onedrive_path"]
@@ -66,26 +60,10 @@ class AutoMove:
             self.sftp = self.__connect_to_SFTP()
             self.sftp.chdir(self.sftp_backup_path)
 
-        pync.notify("📣 AutoMove a démarré !", title="AutoMove 🔁", actions="Close",
-                    execute=f'open "{self.icloud_path}"')
-
-    def checkPID(self):
-        """Checks whether the app is already running, and quits if so."""
-
-        if "PID" in os.listdir(os.path.dirname(__file__)):
-            with open(os.path.join(os.path.dirname(__file__), "PID"), "r") as f:
-                pid = f.readline()
-
-            exit(f"AutoMove already running with PID {pid}")
-
-        else:
-            pid = os.getpid()
-
-            with open(os.path.join(os.path.dirname(__file__), "PID"), "w") as f:
-                f.write(f'{pid}')
-
-            if self.verbose:
-                print(f"AutoMove started with PID [{pid}].\n")
+        send_notification(
+            message="✅ AutoMove a démarré !",
+            important=True,
+        )
 
     def run(self):
         """Contains the main `while True` loop of the app"""
@@ -122,17 +100,20 @@ class AutoMove:
 
             time.sleep(1)
 
-    def __connect_to_SFTP(self) -> paramiko.SFTPClient:
+    def __connect_to_SFTP(self) -> SFTPClient:
         """Connects AutoMove to the distant NAS server via SFTP
 
         Returns:
-            `paramiko.SFTPClient`: The SFTP client object
+            `SFTPClient`: The SFTP client object
         """
 
         transport = paramiko.Transport((self.host, self.port))
         transport.connect(None, self.account, self.pw)
-        client = paramiko.SFTPClient.from_transport(transport)
-        print("[SFTP] Connected to NAS.")
+        client = SFTPClient.from_transport(transport)
+        print(
+            f"\n[SFTP] Connected to NAS via SFTP on {self.host} on port {self.port}.")
+        print()
+
         return client
 
     def __get_files_to_upload(self, folder: str) -> List[str]:
@@ -217,8 +198,10 @@ class AutoMove:
                                     f'\t\tWell copied from OneDrive to iCloud, but to root since name was not recognized by Regexps.')
 
                         if not silent:
-                            pync.notify(f"❓ Oups! Path inconnu\n{file_name} a été déplacé à la racine du dossier.",
-                                        title="AutoMove 🔁", actions="Close", execute=f'open "{os.path.join(self.icloud_path, f)}"')
+                            send_notification(
+                                message="❓ Oops... Path inconnu",
+                                content=f"{file_name} a été déplacé à la racine du dossier.",
+                            )
                     except FileNotFoundError:
                         if self.verbose:
                             print(
@@ -226,8 +209,11 @@ class AutoMove:
                             print("="*30)
 
                         err = True
-                        pync.notify(f"❌ Oups, impossible de déplacer {file_name}.",
-                                    title="AutoMove 🔁", actions="Close")
+                        send_notification(
+                            message=f"🚨 Oups, impossible de déplacer ce fichier",
+                            content=f"{file_name}",
+                            error=True,
+                        )
                 else:
                     try:
                         if self.sftp_bool:
@@ -254,8 +240,9 @@ class AutoMove:
                                     f'\t✅ {from_path} -> {dest_path}')
 
                         if not silent:
-                            pync.notify(f"✅ {file_name} a été déplacé depuis {'le NAS' if self.sftp_bool else 'OneDrive'} vers iCloud.", title="AutoMove 🔁",
-                                        actions="Close", execute=f'open "{os.path.join(self.icloud_path, new_path)}"')
+                            send_notification(
+                                message=f"✅ {file_name} a bien été déplacé {'du NAS' if self.sftp_bool else 'OneDrive'} vers iCloud !",
+                            )
 
                     except FileNotFoundError:
                         if self.verbose:
@@ -264,8 +251,11 @@ class AutoMove:
                             print("="*30)
 
                         err = True
-                        pync.notify(f"❌ Oups, impossible de déplacer {file_name}.",
-                                    title="AutoMove 🔁", actions="Close")
+                        send_notification(
+                            message=f"🚨 Oups, impossible de déplacer ce fichier",
+                            content=f"{file_name}",
+                            error=True,
+                        )
 
             else:
                 if self.verbose:
@@ -281,8 +271,9 @@ class AutoMove:
                                     os.path.join(self.icloud_path, new_path))
 
                     if not silent:
-                        pync.notify(f"✅ {file_name} a été mis à jour sur iCloud.", title="AutoMove 🔁",
-                                    actions="Close", execute=f'open "{os.path.join(self.icloud_path, new_path)}"')
+                        send_notification(
+                            message=f"✅ {file_name} a été mis à jour sur iCloud.",
+                        )
 
                 except FileNotFoundError:
                     if self.verbose:
@@ -291,15 +282,23 @@ class AutoMove:
                         print("="*30)
 
                     err = True
-                    pync.notify(f"❌ Oups, impossible de déplacer {file_name}.",
-                                title="AutoMove 🔁", actions="Close")
+                    send_notification(
+                        message=f"🚨 Oups... Impossible de déplacer un ficher",
+                        content=f"{file_name}",
+                        error=True,
+                    )
 
         if silent and not err:
-            pync.notify(f"✅  Bonne nouvelle ! \n{len(self.tmp_paths)} fichier(s) copiés sur iCloud.",
-                        title="AutoMove 🔁", actions="Close", execute=f'open "{self.icloud_path}"')
+            send_notification(
+                message=f"✅  Bonne nouvelle !",
+                content=f"{len(self.tmp_paths)} fichier(s) copiés sur iCloud.",
+            )
+
         elif silent and err:
-            pync.notify(f"❌ Oups, il y a eu une erreur pendant la sauvegarde des fichiers sur iCloud.",
-                        title="AutoMove 🔁", actions="Close", execute=f'code "/Users/clementsicard/Developer/GitHub/Automove"')
+            send_notification(
+                message=f"🚨 Oups, il y a eu une erreur pendant la sauvegarde des fichiers sur iCloud.",
+                error=True,
+            )
 
     def __backup_files_on_NAS(self) -> None:
         """Backs up a list of files to the NAS, respecting the infered arborescent structure.
@@ -316,6 +315,7 @@ class AutoMove:
 
         Args:
             `tmp_path` (`str`): 'From' path
+
             `new_path` (`str`): 'To' path
         """
 
@@ -332,42 +332,12 @@ class AutoMove:
                 print("=" * 30)
                 print()
 
-            pync.notify(f"❓ Oups! Soucis de path pour la sauvegarde sur le NAS...\nCliquer pour debug",
-                        title="AutoMove 🔁", actions="Close", execute=f'code "/Users/clementsicard/Developer/GitHub/Automove"')
+            send_notification(
+                message=f"❓ Oups! Soucis de path pour la sauvegarde sur le NAS...",
+                error=True
+            )
 
     def close(self):
         """Closes cleanly the SFTP client in order to end the app.
         """
         self.sftp.close()
-
-
-def modified_path_with_regex(file_name: str) -> str:
-    """Generates the arborescent-structure path infered by the name of a file, following rules given by above regular expressions
-
-    Args:
-        `file_name` (`str`): Name of the file we want to transform
-
-    Returns:
-        str: The modified path
-    """
-
-    if re.search(SERIES_REGEXP, file_name):
-        idx = file_name[1:].find("/") + 1
-        return file_name[:idx + 1] + "EXERCIZES" + file_name[idx:]
-    elif re.search(HW_REGEXP, file_name):
-        idx = file_name[1:].find("/") + 1
-        return file_name[:idx + 1] + "HOMEWORKS" + file_name[idx:]
-    elif re.search(LECTURE_REGEXP, file_name):
-        idx = file_name[1:].find("/") + 1
-        return file_name[: idx + 1] + "LECTURES" + file_name[idx:]
-    elif re.search(CS_REGEXP, file_name):
-        idx = file_name[1:].find("/") + 1
-        return file_name[: idx + 1] + "CHEATSHEETS" + file_name[idx:]
-    elif re.search(EXAM_REGEXP, file_name):
-        idx = file_name[1:].find("/") + 1
-        return file_name[: idx + 1] + "EXAMS" + file_name[idx:]
-    elif re.search(REVISION_REGEXP, file_name):
-        idx = file_name[1:].find("/") + 1
-        return file_name[: idx + 1] + "REVISIONS" + file_name[idx:]
-    else:
-        return file_name

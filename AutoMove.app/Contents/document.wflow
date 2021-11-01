@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>509</string>
+	<string>512</string>
 	<key>AMApplicationVersion</key>
 	<string>2.10</string>
 	<key>AMDocumentVersion</key>
@@ -55,11 +55,11 @@
 				<key>ActionBundlePath</key>
 				<string>/System/Library/Automator/Run Shell Script.action</string>
 				<key>ActionName</key>
-				<string>Exécuter un script Shell</string>
+				<string>Shell-Skript ausführen</string>
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>nohup /usr/local/bin/python3 &lt;path to Python script : TO MODIFY&gt;/automove.py &gt; /dev/null 2&gt;&amp;1 &amp;</string>
+					<string>/usr/local/bin/automove &gt; /dev/null 2&gt;&amp;1 &amp;</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -90,9 +90,9 @@
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
-					<string>Script</string>
-					<string>Commande</string>
-					<string>Exécuter</string>
+					<string>Skript</string>
+					<string>Befehl</string>
+					<string>Ausführen</string>
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
@@ -176,7 +176,7 @@
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
-				<string>719.500000:252.000000</string>
+				<string>529.000000:252.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
