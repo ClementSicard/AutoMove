@@ -12,6 +12,10 @@ __pycache__/
 # C extensions
 *.so
 
+*.ai
+
+.idea
+
 # Distribution / packaging
 .Python
 build/
