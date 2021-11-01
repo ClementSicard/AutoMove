@@ -179,8 +179,7 @@ class AutoMove:
         """Helper function to copy the files in `self.tmp_paths` to iCloud
         """
 
-        silent = False
-        # silent = len(self.tmp_paths) > 1
+        silent = len(self.tmp_paths) > 1
         err = False
 
         for f in self.tmp_paths:
