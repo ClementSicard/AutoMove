@@ -1,39 +1,59 @@
+
 # AutoMove
 
-Python script running in background to automatically move files from OneDrive directory to an iCloud directory.
+![](res/icons/icon_256.png)
 
-You will need the following libraries to be able to use it :
+Python script running in background for macOS, to automatically move [Notability](https://apps.apple.com/us/app/notability/id360593530) backups from either a OneDrive directory or a NAS to an iCloud directory, in realtime.
 
-```python
-configparser
-shutil
-os
-glob
-time
-pync
+**Functionalities** :
+
+- Automatically **sends notifications to Notification Center in macO**S when anything happens (copy of a file, multiple files, copy failure, app starting)
+- **Real-time** updates
+- **Automatically structures the backup folder** on either NAS or OneDrive by smartly inferring the structure based on the file names
+- **One and only one instance** can run simultaneously on the same machine
+
+## Setting things up
+
+### **1 - Install the dependencies** using the following command:
+
+```bash
+pip install -r requirement.txt
 ```
 
-You can install all of them using this command :
+### **2 - Fill in `config.ini`**
 
+You just have to fill `config.ini` with the corresponding paths : 
+- The path to your mounted iCloud folder
+- *Optionally*: The path to your mounted OneDrive folder
+- *Optionally, if not above*: The credentials for SFTP connection to your NAS drive.
+
+The `config.ini` file should have this form:
+
+```ini
+[PATHS]
+icloud_path = <Path to mounted iCloud folder>
+onedrive_path = <Path to mounted OneDrive fodler, if using OneDrive>
+sftp_path = <Path for Notability temporary auto-backup on NAS>
+sftp_backup_path = <Path for structured backup on NAS>
+
+[SFTP]
+sftp_host = <NAS URL or IP address>
+sftp_port = <SFTP Port>
+sftp_account = <SFTP Account>
+sftp_pw = <SFTP Password>
 ```
-pip install configparser shutil os glob time pync
-```
 
+## Run it in the background or in an [Automator](https://support.apple.com/fr-fr/guide/automator/welcome/mac) app
 
-You just have to fill your `config.ini` file with the corresponding paths to your directories, and fill in the `PATH_TO_INI_FILE` in the `automove.py` file, and the job will be done!
+To have it run on the background, use the following command from terminal :
 
-To have it running on the background, use the following command from terminal :
-
-```shell
-python3 automove.py &
+```bash
+python3 main.py [-h] [--sftp] [-v] &
 ```
 
 You can easily set up an Automator app starting AutoMove automatically when logging in by creating a Shell script-executing app, and insert in it the following command :
 
 ```shell
-nohup /usr/local/bin/python3 <path to Python script>/automove.py > /dev/null 2>&1 &
+nohup /usr/local/bin/python3 <path to Python script>/main.py > /dev/null 2>&1 &
 ```
-Just open the Automator app and set it on your device.
-
-The script also automatically sends notifications to Notification Center in macOS when anything happens (copy of a file, multiple files, copy failure, app starting)
-
+Just open the Automator app and set it on your device to start at the beginning of a session, et voilà :)
