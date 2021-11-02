@@ -7,7 +7,7 @@ Python script running in background for macOS, to automatically move [Notability
 
 **Functionalities** :
 
-- Automatically **sends notifications to Notification Center in macO**S when anything happens (copy of a file, multiple files, copy failure, app starting)
+- Automatically **sends notifications to Notification Center in macOS** when anything happens (copy of a file, multiple files, copy failure, app starting)
 - **Real-time** updates
 - **Automatically structures the backup folder** on either NAS or OneDrive by smartly inferring the structure based on the file names
 - **One and only one instance** can run simultaneously on the same machine
