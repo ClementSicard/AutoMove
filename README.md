@@ -1,7 +1,7 @@
 
 # AutoMove
 
-![](res/icons/icon_256.png)
+![](res/banner.png)
 
 Python script running in background for macOS, to automatically move [Notability](https://apps.apple.com/us/app/notability/id360593530) backups from either a OneDrive directory or a NAS to an iCloud directory, in realtime.
 
