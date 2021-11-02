@@ -57,3 +57,17 @@ You can easily set up an Automator app starting AutoMove automatically when logg
 nohup /usr/local/bin/python3 <path to Python script>/main.py > /dev/null 2>&1 &
 ```
 Just open the Automator app and set it on your device to start at the beginning of a session, et voilà :)
+
+
+
+
+```bash
+sudo wget https://github.com/shiftkey/desktop/releases/download/release-2.9.4-linux1/GitHubDesktop-linux-2.9.4-linux1.deb
+
+sudo apt-get install gdebi-core
+sudo gdebi /home/your_username/GitHubDesktop-linux-2.9.4-linux1.deb
+
+
+
+
+```
