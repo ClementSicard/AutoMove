@@ -1,6 +1,7 @@
 import os
 import re
 from typing import Union, Tuple
+import psutil
 
 SERIES_REGEXP = r"\w+ - S\d*.*.\w+$"
 HW_REGEXP = r"\w+ - HW\d*.*.\w+$"
@@ -46,22 +47,26 @@ def send_notification(
 def checkPID() -> Union[Tuple[bool, int], None]:
     """Checks whether the app is already running, and quits if so."""
 
-    if "PID" in os.listdir(os.path.dirname(__file__)):
-        with open(os.path.join(os.path.dirname(__file__), "PID"), "r") as f:
+    if "app.pid" in os.listdir(os.path.dirname(__file__)):
+        with open(os.path.join(os.path.dirname(__file__), "app.pid"), "r") as f:
             pid = f.readline()
 
-        send_notification(
-            message="❌ Oops",
-            content=f"Une instance est déjà en cours [PID {pid}]",
-            important=True
-        )
+        if psutil.pid_exists(int(pid)):
+            send_notification(
+                message="❌ Oops",
+                content=f"Une instance est déjà en cours [PID {pid}]",
+                important=True
+            )
 
-        exit(f"AutoMove already running with PID {pid}")
+            exit(f"AutoMove already running with PID {pid}")
+
+        else:
+            os.remove(os.path.join(os.path.dirname(__file__), "app.pid"))
 
     else:
         pid = os.getpid()
 
-        with open(os.path.join(os.path.dirname(__file__), "PID"), "w") as f:
+        with open(os.path.join(os.path.dirname(__file__), "app.pid"), "w") as f:
             f.write(f'{pid}')
 
         return True, pid
