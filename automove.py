@@ -69,36 +69,48 @@ class AutoMove:
         """Contains the main `while True` loop of the app"""
 
         nothing = False
+        try:
+            while True:
+                icloud_folders = [folder for folder in next(os.walk(self.icloud_path))[
+                    1] if folder[0] != "."]
 
-        while True:
-            icloud_folders = [folder for folder in next(os.walk(self.icloud_path))[
-                1] if folder[0] != "."]
+                self.tmp_paths = []
+                self.new_paths = []
 
-            self.tmp_paths = []
-            self.new_paths = []
+                for folder in icloud_folders:
+                    files_to_upload_by_folder = self.__get_files_to_upload(
+                        folder)
 
-            for folder in icloud_folders:
-                files_to_upload_by_folder = self.__get_files_to_upload(folder)
+                    if files_to_upload_by_folder:
+                        self.tmp_paths.extend(files_to_upload_by_folder)
 
-                if files_to_upload_by_folder:
-                    self.tmp_paths.extend(files_to_upload_by_folder)
+                if self.tmp_paths:
+                    print(f'{len(self.tmp_paths)} new files to upload.')
+                    nothing = False
 
-            if self.tmp_paths:
-                print(f'{len(self.tmp_paths)} new files to upload.')
-                nothing = False
+                    self.__copy_files_to_icloud()
+                    print("\t\tDone copying to iCloud")
 
-                self.__copy_files_to_icloud()
-                print("\t\tDone copying to iCloud")
+                    if self.sftp_bool:
+                        self.__backup_files_on_NAS()
+                        print("Done backing up files to NAS")
 
-                if self.sftp_bool:
-                    self.__backup_files_on_NAS()
-                    print("Done backing up files to NAS")
+                elif not nothing:
+                    print('0 new file to upload.')
+                    nothing = True
 
-            elif not nothing:
-                print('0 new file to upload.')
-                nothing = True
+                time.sleep(1)
 
-            time.sleep(1)
+        except paramiko.ssh_exception.SSHException:
+            print("Connection lost.")
+            connected = False
+
+            while not connected:
+                try:
+                    self.sftp = self.__connect_to_SFTP()
+                    connected = False
+                except:
+                    time.sleep(5)
 
     def __connect_to_SFTP(self) -> SFTPClient:
         """Connects AutoMove to the distant NAS server via SFTP

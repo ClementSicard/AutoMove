@@ -44,7 +44,7 @@ def send_notification(
     os.system(cmd)
 
 
-def checkPID() -> Union[Tuple[bool, int], None]:
+def checkPID() -> Tuple[bool, int]:
     """Checks whether the app is already running, and quits if so."""
 
     if "app.pid" in os.listdir(os.path.dirname(__file__)):
@@ -62,6 +62,8 @@ def checkPID() -> Union[Tuple[bool, int], None]:
 
         else:
             os.remove(os.path.join(os.path.dirname(__file__), "app.pid"))
+
+        return False, pid
 
     else:
         pid = os.getpid()
