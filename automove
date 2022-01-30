@@ -1,0 +1,1 @@
+nohup /opt/miniconda3/bin/python /Users/csicard/Developer/GitHub/AutoMove/main.py --sftp > /dev/null 2>&1 &

@@ -2,11 +2,8 @@ import paramiko
 import configparser
 import shutil
 import os
-import glob
 import time
 import configparser
-import pync
-import re
 from paramiko import SFTPClient
 from fnmatch import fnmatch
 from typing import List, Dict, Union
@@ -51,14 +48,17 @@ class AutoMove:
         self.onedrive_path = config["PATHS"]["onedrive_path"]
 
         if self.sftp_bool:
+            connected = False
+            attempts_count = 0
+
             self.sftp_path = config["PATHS"]["sftp_path"]
             self.sftp_backup_path = config["PATHS"]["sftp_backup_path"]
             self.host = config["SFTP"]["sftp_host"]
             self.port = int(config["SFTP"]["sftp_port"])
             self.account = config["SFTP"]["sftp_account"]
             self.pw = config["SFTP"]["sftp_pw"]
+
             self.sftp = self.__connect_to_SFTP()
-            self.sftp.chdir(self.sftp_backup_path)
 
         send_notification(
             message="✅ AutoMove a démarré !",
@@ -103,14 +103,6 @@ class AutoMove:
 
         except paramiko.ssh_exception.SSHException:
             print("Connection lost.")
-            connected = False
-
-            while not connected:
-                try:
-                    self.sftp = self.__connect_to_SFTP()
-                    connected = False
-                except:
-                    time.sleep(5)
 
     def __connect_to_SFTP(self) -> SFTPClient:
         """Connects AutoMove to the distant NAS server via SFTP
@@ -119,12 +111,18 @@ class AutoMove:
             `SFTPClient`: The SFTP client object
         """
 
-        transport = paramiko.Transport((self.host, self.port))
-        transport.connect(None, self.account, self.pw)
-        client = SFTPClient.from_transport(transport)
-        print(
-            f"\n[SFTP] Connected to NAS via SFTP on {self.host} on port {self.port}.")
-        print()
+        try:
+            transport = paramiko.Transport((self.host, self.port))
+            transport.connect(None, self.account, self.pw)
+            client = SFTPClient.from_transport(transport)
+            print(
+                f"\n[SFTP] Connected to NAS via SFTP on {self.host} on port {self.port}.")
+            print()
+            self.sftp.chdir(self.sftp_backup_path)
+        except:
+            if self.verbose:
+                print("Cannot connect. Trying again...")
+                time.sleep(5)
 
         return client
 
@@ -197,6 +195,7 @@ class AutoMove:
                 if new_path == f:
                     try:
                         if self.sftp_bool:
+
                             self.sftp.get(os.path.join(self.sftp_backup_path, f),
                                           os.path.join(self.icloud_path, f))
                             if self.verbose:
@@ -350,6 +349,7 @@ class AutoMove:
             )
 
     def close(self):
-        """Closes cleanly the SFTP client in order to end the app.
+        """
+        Closes cleanly the SFTP client in order to end the app.
         """
         self.sftp.close()

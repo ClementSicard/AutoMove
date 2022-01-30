@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Union, Tuple
+from typing import Tuple
 import psutil
 
 SERIES_REGEXP = r"\w+ - S\d*.*.\w+$"
@@ -11,6 +11,7 @@ LECTURE_REGEXP = r"\w+ - (\d*|Lecture notes|SLIDES|Slides).*.\w+$"
 CS_REGEXP = r"\w+ - (Summary|Tricks|Useful to know|Cheatsheet|Formulaire)*.*.\w+$"
 DIRNAME = os.path.dirname(__file__)
 PATH_TO_INI_FILE = os.path.join(os.path.dirname(__file__), "config.ini")
+PATH_TO_ALERTER = os.path.join(os.path.dirname(__file__), "res", "./alerter")
 BUNDLE_ID = "com.apple.automator.AutoMove"
 
 TIMEOUT = 4
@@ -39,7 +40,7 @@ def send_notification(
     content_string = f'-message "{content}"'
     timeout_string = f"-timeout {IMPORTANT_TIMEOUT}" if important else f"-timeout {TIMEOUT}" if not error else ""
 
-    cmd = f'res/./alerter -title "AutoMove" -sender {BUNDLE_ID} {timeout_string} -subtitle "{message}" {content_string if message else ""} -sound {"Blow" if error else "Glass"} > /dev/null 2>&1 &'
+    cmd = f'{PATH_TO_ALERTER} -title "AutoMove" -sender {BUNDLE_ID} {timeout_string} -subtitle "{message}" {content_string if message else ""} -sound {"Blow" if error else "Glass"} > /dev/null 2>&1 &'
 
     os.system(cmd)
 
@@ -63,12 +64,17 @@ def checkPID() -> Tuple[bool, int]:
         else:
             os.remove(os.path.join(os.path.dirname(__file__), "app.pid"))
 
+            pid = os.getpid()
+            path = os.path.join(os.path.dirname(__file__), "app.pid")
+            with open(path, "w") as f:
+                f.write(f'{pid}')
+
         return False, pid
 
     else:
         pid = os.getpid()
-
-        with open(os.path.join(os.path.dirname(__file__), "app.pid"), "w") as f:
+        path = os.path.join(os.path.dirname(__file__), "app.pid")
+        with open(path, "w") as f:
             f.write(f'{pid}')
 
         return True, pid
